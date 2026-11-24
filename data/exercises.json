@@ -1,0 +1,37 @@
+[
+  {
+    "id": "gpio-pd12",
+    "title": "Bài 1: PD12 Output Push-pull, No pull",
+    "description": "Bật clock GPIOD, cấu hình PD12 là Output (MODER = 01), Push-pull (OTYPER = 0), không pull-up/pull-down (PUPDR = 00), sau đó bật LED bằng BSRR.",
+    "starter": "#include \"stm32f4xx.h\"\n\nvoid led_init(void) {\n    // TODO\n}\n",
+    "solution": "#include \"stm32f4xx.h\"\n\nvoid led_init(void) {\n    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;\n    GPIOD->MODER &= ~(3U << (12 * 2));\n    GPIOD->MODER |=  (1U << (12 * 2));\n    GPIOD->OTYPER &= ~(1U << 12);\n    GPIOD->PUPDR &= ~(3U << (12 * 2));\n    GPIOD->BSRR = (1U << 12);\n}\n"
+  },
+  {
+    "id": "toggle-bit",
+    "title": "Bài 2: Đảo bit thứ n bằng XOR",
+    "description": "Viết hàm uint32_t toggle_bit(uint32_t reg, uint8_t n) trả về reg sau khi đảo bit n bằng toán tử ^.",
+    "starter": "#include <stdint.h>\n\nuint32_t toggle_bit(uint32_t reg, uint8_t n) {\n    // TODO\n}\n",
+    "solution": "#include <stdint.h>\n\nuint32_t toggle_bit(uint32_t reg, uint8_t n) {\n    reg ^= (1U << n);\n    return reg;\n}\n"
+  },
+  {
+    "id": "exti0",
+    "title": "Bài 3: EXTI0_IRQHandler & xóa Pending",
+    "description": "Viết ISR EXTI0_IRQHandler(): kiểm tra cờ PR0, xóa cờ bằng cách ghi 1 vào EXTI->PR (không dùng |=), rồi đảo LED PD12.",
+    "starter": "#include \"stm32f4xx.h\"\n\nvoid EXTI0_IRQHandler(void) {\n    // TODO\n}\n",
+    "solution": "#include \"stm32f4xx.h\"\n\nvoid EXTI0_IRQHandler(void) {\n    if (EXTI->PR & EXTI_PR_PR0) {\n        EXTI->PR = EXTI_PR_PR0;\n        GPIOD->ODR ^= (1U << 12);\n    }\n}\n"
+  },
+  {
+    "id": "usart-puts",
+    "title": "Bài 4: USART1 gửi chuỗi bằng Polling TXE",
+    "description": "Viết void usart1_puts(const char *s): với mỗi ký tự, chờ cờ TXE trong USART1->SR rồi ghi vào USART1->DR. Kết thúc chờ TC.",
+    "starter": "#include \"stm32f4xx.h\"\n\nvoid usart1_puts(const char *s) {\n    // TODO\n}\n",
+    "solution": "#include \"stm32f4xx.h\"\n\nvoid usart1_puts(const char *s) {\n    while (*s) {\n        while (!(USART1->SR & USART_SR_TXE));\n        USART1->DR = (uint8_t)*s++;\n    }\n    while (!(USART1->SR & USART_SR_TC));\n}\n"
+  },
+  {
+    "id": "spi1-mode0",
+    "title": "Bài 5: SPI1 Master Mode 0",
+    "description": "Bật clock SPI1 (APB2), cấu hình CR1: Master, CPOL=0, CPHA=0, NSS phần mềm (SSM=1, SSI=1), baud /16, sau đó bật SPE.",
+    "starter": "#include \"stm32f4xx.h\"\n\nvoid spi1_init(void) {\n    // TODO\n}\n",
+    "solution": "#include \"stm32f4xx.h\"\n\nvoid spi1_init(void) {\n    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;\n    SPI1->CR1 = 0;\n    SPI1->CR1 |= SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI | (3U << 3);\n    SPI1->CR1 &= ~(SPI_CR1_CPOL | SPI_CR1_CPHA);\n    SPI1->CR1 |= SPI_CR1_SPE;\n}\n"
+  }
+]

@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Embedded C Lab – STM32</title>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
+<link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+<aside id="sidebar">
+  <h1>⚡ Embedded C Lab</h1>
+  <nav>
+    <button data-view="theory" class="active">🟢 Lý thuyết</button>
+    <button data-view="tools">🔵 Công cụ tính toán</button>
+    <button data-view="playground">🟡 Code Playground</button>
+    <button data-view="quiz">🔴 Trắc nghiệm</button>
+    <button data-view="cards">🃏 Flashcards</button>
+  </nav>
+  <button id="themeBtn">🌓 Đổi giao diện</button>
+</aside>
+
+<main>
+  <!-- Module 1 -->
+  <section id="theory" class="view active">
+    <h2>Lý thuyết cốt lõi</h2>
+    <input id="theorySearch" type="search" placeholder="Tìm kiếm: BSRR, NVIC, mutex...">
+    <div id="theoryList"></div>
+  </section>
+
+  <!-- Module 2 -->
+  <section id="tools" class="view">
+    <h2>Công cụ tính toán</h2>
+    <div class="grid">
+      <div class="card">
+        <h3>1. Bit-band Alias</h3>
+        <label>Địa chỉ byte (hex) <input id="bbAddr" value="0x40020C14"></label>
+        <label>Bit (0–7, hoặc 0–31 với địa chỉ word) <input id="bbBit" type="number" value="12" min="0" max="31"></label>
+        <button id="bbCalc">Tính</button>
+        <pre id="bbOut"></pre>
+      </div>
+      <div class="card">
+        <h3>2. USART_BRR (OVER8=0)</h3>
+        <label>f<sub>PCLK</sub> (Hz) <input id="brrClk" type="number" value="16000000"></label>
+        <label>Baud rate <input id="brrBaud" type="number" value="115200"></label>
+        <button id="brrCalc">Tính</button>
+        <pre id="brrOut"></pre>
+      </div>
+      <div class="card">
+        <h3>3. SysTick SYST_RVR</h3>
+        <label>f<sub>AHB</sub> (Hz) <input id="stClk" type="number" value="16000000"></label>
+        <label>Thời gian T (ms) <input id="stMs" type="number" value="1" step="any"></label>
+        <button id="stCalc">Tính</button>
+        <pre id="stOut"></pre>
+      </div>
+      <div class="card">
+        <h3>4. Ring Buffer (size 8)</h3>
+        <div class="row"><input id="rbVal" value="A" maxlength="2" size="3"><button id="rbPut">Put</button><button id="rbGet">Get</button><button id="rbReset">Reset</button></div>
+        <div id="rbView" class="ring"></div>
+        <pre id="rbOut"></pre>
+      </div>
+    </div>
+  </section>
+
+  <!-- Module 3 -->
+  <section id="playground" class="view">
+    <h2>Code Playground</h2>
+    <div class="row"><select id="exSelect"></select><button id="exReset">Nạp lại code mẫu</button><button id="exSolution">Xem đáp án</button></div>
+    <p id="exDesc" class="desc"></p>
+    <textarea id="editor"></textarea>
+    <button id="checkBtn" class="primary">▶ Biên dịch &amp; Chấm điểm</button>
+    <small class="desc">Code được biên dịch bằng GCC thật trên godbolt.org cùng header STM32 giả lập (thanh ghi là biến RAM), sau đó chạy bộ test kiểm tra giá trị thanh ghi.</small>
+    <pre id="compileLog"></pre>
+    <ul id="checkOut" class="checks"></ul>
+  </section>
+
+  <!-- Module 4 -->
+  <section id="quiz" class="view">
+    <h2>Trắc nghiệm <span id="score"></span></h2>
+    <button id="quizReset">Làm lại</button>
+    <div id="quizList"></div>
+  </section>
+
+  <section id="cards" class="view">
+    <h2>Flashcards <small>(click để lật)</small></h2>
+    <div id="cardList" class="grid"></div>
+  </section>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="js/calculators.js"></script>
+<script src="js/evaluator.js"></script>
+<script src="js/quiz.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
