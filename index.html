@@ -1,180 +1,545 @@
-<!doctype html>
-<html lang="vi" data-theme="dark">
+<!DOCTYPE html>
+<html lang="vi" class="h-full dark">
 <head>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Embedded C Lab</title>
-<meta name="description" content="Học C nhúng cho STM32 / ARM Cortex-M: lý thuyết, công cụ tính toán và Playground biên dịch C thật.">
-<script>/* apply saved theme (or OS preference) before first paint */
-try { var t = JSON.parse(localStorage.getItem('theme')); } catch (e) {}
-document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');</script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<link rel="stylesheet" href="css/styles.css">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Embedded C Lab — Học Lý thuyết, Công cụ &amp; Playground C Nhúng STM32</title>
+  <meta name="description" content="Học C nhúng cho STM32 / ARM Cortex-M: lý thuyết, công cụ tính toán phần cứng và Playground biên dịch C thật." />
+  <script>
+    try {
+      var rawTheme = localStorage.getItem('theme');
+      var savedTheme = rawTheme ? JSON.parse(rawTheme) : null;
+      if (savedTheme === 'light') {
+        document.documentElement.classList.remove('dark');
+      } else {
+        document.documentElement.classList.add('dark');
+      }
+    } catch (e) {
+      document.documentElement.classList.add('dark');
+    }
+  </script>
+
+  <!-- Fonts: IBM Plex Sans & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- CodeMirror 5 CSS -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/dracula.min.css" />
+
+  <!-- Tailwind CSS CDN & Config -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="js/config/tailwind-config.js"></script>
+
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css" />
 </head>
-<body>
-<a class="skip-link" href="#main">Bỏ qua tới nội dung</a>
 
-<header class="sidebar">
-  <a class="brand" href="#/theory">
-    <span class="brand-mark"><i data-lucide="cpu"></i></span>
-    <span><strong>Embedded C Lab</strong><small>STM32 · Cortex-M</small></span>
-  </a>
-  <nav class="nav" aria-label="Phân hệ">
-    <a href="#/theory" data-view="theory"><i data-lucide="book-open"></i><span>Lý thuyết</span></a>
-    <a href="#/lab" data-view="lab"><i data-lucide="square-terminal"></i><span>Playground</span></a>
-    <a href="#/tools" data-view="tools"><i data-lucide="calculator"></i><span>Công cụ</span></a>
-  </nav>
-  <div class="sidebar-foot">
-    <button id="themeBtn" class="btn btn-ghost" type="button" aria-label="Chuyển giao diện sáng/tối">
-      <i data-lucide="sun-moon"></i><span>Sáng / Tối</span>
-    </button>
-    <a class="btn btn-ghost" href="https://github.com/hdung274520/HCMUT-EmbeddedSystemProgramming" target="_blank" rel="noopener">
-      <i data-lucide="github"></i><span>Mã nguồn</span>
-    </a>
-  </div>
-</header>
+<body class="h-full bg-slate-50 text-slate-900 dark:bg-surface-950 dark:text-slate-100 font-sans antialiased flex flex-col lg:flex-row overflow-hidden">
+  <a href="#workspaceContainer" class="sr-only focus:not-sr-only focus:fixed focus:top-3 focus:left-3 focus:z-50 focus:px-3 focus:py-2 focus:rounded-lg focus:bg-emerald-500 focus:text-slate-950 focus:text-xs focus:font-bold">Bỏ qua tới nội dung</a>
 
-<main id="main" tabindex="-1">
-  <!-- ============ Lý thuyết ============ -->
-  <section id="view-theory" class="view" aria-labelledby="theory-h">
-    <h1 id="theory-h" class="sr-only">Lý thuyết</h1>
-    <div class="split">
-      <aside class="pane-list" aria-label="Mục lục">
-        <button class="btn btn-ghost list-toggle" type="button" aria-expanded="false" aria-controls="tocWrap">
-          <i data-lucide="list"></i><span>Mục lục</span>
-        </button>
-        <div id="tocWrap" class="list-wrap">
-          <label class="search">
-            <i data-lucide="search"></i>
-            <span class="sr-only">Tìm trong lý thuyết</span>
-            <input id="theorySearch" type="search" placeholder="Tìm: con trỏ, BSRR, mutex…" autocomplete="off">
-          </label>
-          <p id="searchInfo" class="list-info" aria-live="polite"></p>
-          <nav id="toc"></nav>
-        </div>
-      </aside>
-      <article id="article" class="article">
-        <div class="skeleton"></div>
-      </article>
+  <!-- MOBILE TOP BAR (< 1024px) -->
+  <header class="lg:hidden h-14 shrink-0 border-b border-slate-200 dark:border-slate-800/90 bg-white dark:bg-surface-900 px-3 flex items-center justify-between gap-2 z-30">
+    <div class="flex items-center gap-2 min-w-0">
+      <button id="mobileMenuBtn" type="button" aria-label="Mở mục lục"
+              class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 12h16M4 18h16" />
+        </svg>
+      </button>
+      <div class="w-8 h-8 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <rect x="6" y="6" width="12" height="12" rx="2" />
+          <path stroke-linecap="round" d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" />
+        </svg>
+      </div>
+      <div class="truncate">
+        <span class="text-sm font-bold text-slate-900 dark:text-white block leading-tight truncate">Embedded C Lab</span>
+        <span class="text-[11px] font-mono text-slate-500 dark:text-slate-400 block leading-tight truncate">STM32 • GCC 15</span>
+      </div>
     </div>
-  </section>
 
-  <!-- ============ Playground ============ -->
-  <section id="view-lab" class="view" aria-labelledby="lab-h">
-    <h1 id="lab-h" class="sr-only">Code Playground</h1>
-    <div class="split">
-      <aside class="pane-list" aria-label="Danh sách bài tập">
-        <button class="btn btn-ghost list-toggle" type="button" aria-expanded="false" aria-controls="exWrap">
-          <i data-lucide="list-checks"></i><span>Danh sách bài</span>
-        </button>
-        <div id="exWrap" class="list-wrap">
-          <div class="progress-card">
-            <div class="progress-head"><span>Tiến độ</span><strong id="progressText">0/0</strong></div>
-            <div class="progress-bar"><span id="progressBar"></span></div>
-          </div>
-          <nav id="exList"></nav>
+    <div class="flex items-center gap-1.5 shrink-0">
+      <div class="flex items-center bg-slate-100 dark:bg-surface-850 p-0.5 rounded-lg border border-slate-200 dark:border-slate-800">
+        <button type="button" data-mode-switch="theory" class="mobile-mode-btn px-2 py-1 rounded-md text-xs font-medium cursor-pointer">Lý thuyết</button>
+        <button type="button" data-mode-switch="playground" class="mobile-mode-btn px-2 py-1 rounded-md text-xs font-medium cursor-pointer">Lab</button>
+        <button type="button" data-mode-switch="tools" class="mobile-mode-btn px-2 py-1 rounded-md text-xs font-medium cursor-pointer">Công cụ</button>
+      </div>
+      <button id="mobileThemeBtn" type="button" aria-label="Chuyển đổi chế độ Sáng và Tối"
+              class="p-2 rounded-lg border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <svg class="w-4 h-4 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+        </svg>
+        <svg class="w-4 h-4 hidden dark:block text-amber-300" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- 1. PRIMARY APP RAIL -->
+  <aside id="appRail" aria-label="Điều hướng ứng dụng"
+         class="hidden lg:flex w-52 shrink-0 flex-col justify-between bg-white dark:bg-surface-900 border-r border-slate-200 dark:border-slate-800/90 select-none z-20">
+    <div>
+      <a href="#/theory" class="px-4 py-4 border-b border-slate-200 dark:border-slate-800/80 flex items-center gap-3 focus:outline-none focus:ring-2 focus:ring-inset focus:ring-emerald-500">
+        <div class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+          <svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <rect x="6" y="6" width="12" height="12" rx="2" />
+            <path stroke-linecap="round" d="M9 2v4M15 2v4M9 18v4M15 18v4M2 9h4M2 15h4M18 9h4M18 15h4" />
+          </svg>
         </div>
-      </aside>
+        <div class="min-w-0">
+          <h1 class="text-sm font-bold text-slate-900 dark:text-slate-100 leading-tight truncate">Embedded C Lab</h1>
+          <p class="text-[11px] font-mono text-slate-500 dark:text-slate-400 mt-0.5 truncate">STM32 • Cortex-M</p>
+        </div>
+      </a>
 
-      <div class="lab">
-        <header class="task">
-          <div class="task-meta"><span id="exGroup" class="eyebrow"></span><span id="exLevel" class="badge"></span></div>
-          <h2 id="exTitle"></h2>
-          <p id="exDesc" class="task-desc"></p>
-          <details id="exHint" class="disclosure"><summary><i data-lucide="lightbulb"></i>Gợi ý<i data-lucide="chevron-down" class="chev"></i></summary><p></p></details>
-          <details id="exSolution" class="disclosure"><summary><i data-lucide="eye"></i>Đáp án mẫu<i data-lucide="chevron-down" class="chev"></i></summary><pre class="code"><code></code></pre></details>
-        </header>
+      <nav class="p-3 space-y-1.5" aria-label="Chế độ học tập">
+        <button type="button" data-mode-switch="theory"
+                class="rail-nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2 5.5A2.5 2.5 0 014.5 3H11v17H4.5A2.5 2.5 0 012 17.5V5.5zM22 5.5A2.5 2.5 0 0019.5 3H13v17h6.5a2.5 2.5 0 002.5-2.5V5.5z" />
+          </svg>
+          <span>Lý thuyết</span>
+        </button>
 
-        <div class="editor-card">
-          <div class="editor-bar">
-            <span class="file"><i data-lucide="file-code-2"></i>main.c</span>
-            <div class="editor-actions">
-              <button id="resetBtn" class="btn btn-ghost btn-sm" type="button"><i data-lucide="rotate-ccw"></i><span>Đặt lại</span></button>
-              <button id="runBtn" class="btn btn-primary" type="button"><i data-lucide="play"></i><span>Biên dịch &amp; chấm</span><kbd>Ctrl ↵</kbd></button>
+        <button type="button" data-mode-switch="playground"
+                class="rail-nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3" />
+          </svg>
+          <span>Playground</span>
+        </button>
+
+        <button type="button" data-mode-switch="split"
+                class="rail-nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <rect x="3" y="4" width="18" height="16" rx="2" />
+            <path stroke-linecap="round" d="M12 4v16" />
+          </svg>
+          <span>Song song (2 cột)</span>
+        </button>
+
+        <button type="button" data-mode-switch="tools"
+                class="rail-nav-btn w-full flex items-center gap-2.5 px-3 py-2.5 rounded-lg text-[13px] font-medium transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+          <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+            <rect x="4" y="2" width="16" height="20" rx="2" />
+            <path stroke-linecap="round" d="M8 6h8M8 10h2M12 10h2M16 10h0M8 14h2M12 14h2M8 18h2M12 18h2M16 14v4" />
+          </svg>
+          <span>Công cụ</span>
+        </button>
+      </nav>
+    </div>
+
+    <div class="p-3 border-t border-slate-200 dark:border-slate-800/80 space-y-1.5">
+      <div id="compilerStatusBadge" role="status" aria-live="polite"
+           class="flex items-center gap-2 px-3 py-2 rounded-lg text-[11px] font-mono bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 border border-emerald-500/25 mb-2 transition-colors">
+        <span id="compilerStatusDot" class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+        <span id="compilerStatusText" class="truncate">GCC 15 • Sẵn sàng</span>
+      </div>
+
+      <button id="themeToggleBtn" type="button" aria-label="Chuyển đổi chế độ Sáng và Tối"
+              class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-surface-850 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <svg class="w-4 h-4 shrink-0 block dark:hidden" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M21 12.79A9 9 0 1111.21 3a7 7 0 009.79 9.79z" />
+        </svg>
+        <svg class="w-4 h-4 shrink-0 hidden dark:block" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.9" aria-hidden="true">
+          <circle cx="12" cy="12" r="4" />
+          <path stroke-linecap="round" d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+        </svg>
+        <span>Sáng / Tối</span>
+      </button>
+
+      <a href="https://github.com/hdung274520/HCMUT-EmbeddedSystemProgramming" target="_blank" rel="noopener noreferrer"
+         class="w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-[13px] font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-slate-100 hover:bg-slate-100 dark:hover:bg-surface-850 transition focus:outline-none focus:ring-2 focus:ring-emerald-500">
+        <svg class="w-4 h-4 shrink-0" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill-rule="evenodd" clip-rule="evenodd" d="M12 2a10 10 0 00-3.16 19.49c.5.09.68-.22.68-.48v-1.7c-2.78.6-3.37-1.34-3.37-1.34-.45-1.16-1.11-1.47-1.11-1.47-.91-.62.07-.61.07-.61 1 .07 1.53 1.03 1.53 1.03.89 1.53 2.34 1.09 2.91.83.09-.65.35-1.09.64-1.34-2.22-.25-4.56-1.11-4.56-4.95 0-1.09.39-1.99 1.03-2.69-.1-.25-.45-1.27.1-2.65 0 0 .84-.27 2.75 1.03a9.56 9.56 0 015 0c1.91-1.3 2.75-1.03 2.75-1.03.55 1.38.2 2.4.1 2.65.64.7 1.03 1.6 1.03 2.69 0 3.85-2.34 4.7-4.57 4.94.36.31.68.92.68 1.86v2.75c0 .27.18.58.69.48A10 10 0 0012 2z" />
+        </svg>
+        <span>Mã nguồn</span>
+      </a>
+    </div>
+  </aside>
+
+  <!-- Mobile Backdrop -->
+  <div id="mobileDrawerBackdrop" class="fixed inset-0 bg-slate-950/70 backdrop-blur-xs z-30 hidden lg:hidden"></div>
+
+  <!-- 2. CONTEXTUAL SIDEBAR (LÝ THUYẾT / BÀI TẬP PLAYGROUND) -->
+  <aside id="lessonSidebar" aria-label="Mục lục bài học và bài tập"
+         class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full lg:translate-x-0 lg:static flex shrink-0 flex-col bg-slate-50 dark:bg-surface-900 border-r border-slate-200 dark:border-slate-800/90 transition-transform duration-200">
+    <div class="p-3.5 border-b border-slate-200 dark:border-slate-800/80 flex items-center gap-2">
+      <div class="relative flex-1">
+        <svg class="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="11" cy="11" r="7" />
+          <path stroke-linecap="round" d="M20 20l-3.5-3.5" />
+        </svg>
+        <label for="sidebarSearchInput" class="sr-only">Tìm kiếm bài học hoặc bài tập</label>
+        <input id="sidebarSearchInput" type="search" placeholder="Tìm: con trỏ, BSRR, mutex..." autocomplete="off"
+               class="w-full pl-9 pr-3 py-2 rounded-lg text-xs bg-white dark:bg-surface-850 border border-slate-200 dark:border-slate-700/80 text-slate-900 dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+      </div>
+      <button id="closeSidebarBtn" type="button" aria-label="Đóng mục lục"
+              class="lg:hidden p-1.5 rounded-lg text-slate-500 hover:text-slate-900 dark:hover:text-white cursor-pointer">
+        <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path stroke-linecap="round" d="M6 6l12 12M18 6L6 18" />
+        </svg>
+      </button>
+    </div>
+
+    <!-- Tiến độ bài tập (chỉ hiện ở chế độ Playground) -->
+    <div id="sidebarProgressCard" class="hidden mx-3 mt-3 p-3 rounded-xl bg-white dark:bg-surface-850 border border-slate-200 dark:border-slate-800">
+      <div class="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400 mb-2">
+        <span>Tiến độ hoàn thành</span>
+        <strong id="progressText" class="font-mono text-slate-900 dark:text-emerald-400">0/23</strong>
+      </div>
+      <div class="h-1.5 rounded-full bg-slate-200 dark:bg-surface-700 overflow-hidden">
+        <span id="progressBar" class="block h-full w-0 bg-emerald-500 rounded-full transition-all duration-300"></span>
+      </div>
+    </div>
+
+    <div id="sidebarListContainer" class="flex-1 overflow-y-auto px-2.5 py-3 space-y-4">
+      <!-- Render tự động bằng JS -->
+    </div>
+
+    <div class="lg:hidden p-3 border-t border-slate-200 dark:border-slate-800 space-y-2 text-xs">
+      <button type="button" data-mode-switch="split"
+              class="w-full py-2 px-3 rounded-lg font-medium bg-emerald-500/15 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 cursor-pointer">
+        Chế độ Song song (2 cột)
+      </button>
+    </div>
+  </aside>
+
+  <!-- 3. MAIN WORKSPACE -->
+  <main id="workspaceContainer" tabindex="-1" class="flex-1 flex flex-col lg:flex-row min-w-0 min-h-0 overflow-hidden bg-white dark:bg-surface-950 relative outline-none">
+
+    <!-- PANE TRÁI: LÝ THUYẾT -->
+    <section id="theoryPane" aria-label="Nội dung lý thuyết"
+             class="flex-1 h-full flex flex-col min-w-0 min-h-0 overflow-hidden bg-white dark:bg-surface-950">
+
+      <!-- Top bar gọn phía trên vùng đọc -->
+      <div class="shrink-0 px-4 sm:px-8 py-2.5 border-b border-slate-200 dark:border-slate-800/80 bg-slate-50/70 dark:bg-surface-900/60 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <div class="flex items-center gap-1 bg-slate-200/75 dark:bg-surface-850 p-1 rounded-lg border border-slate-200/80 dark:border-slate-800" role="tablist" aria-label="Điều hướng nhanh">
+            <button type="button" data-mode-switch="theory"
+                    class="theory-top-tab px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer bg-white dark:bg-surface-900 text-emerald-700 dark:text-emerald-400 shadow-xs">
+              Lý thuyết
+            </button>
+            <button type="button" data-mode-switch="playground"
+                    class="theory-top-tab px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+              Bài tập GCC
+            </button>
+            <button type="button" data-mode-switch="tools"
+                    class="theory-top-tab px-3 py-1 rounded-md text-xs font-semibold transition cursor-pointer text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+              Công cụ
+            </button>
+          </div>
+
+          <label for="theoryChapterSelect" class="sr-only">Chọn nhanh chương lý thuyết</label>
+          <select id="theoryChapterSelect"
+                  class="hidden sm:block max-w-[230px] rounded-lg bg-white dark:bg-surface-850 border border-slate-200 dark:border-slate-700/80 px-2.5 py-1.5 text-xs font-medium text-slate-700 dark:text-slate-200 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer truncate">
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2">
+          <button id="quickSplitBtn" type="button" title="Mở trình biên dịch C song song bên cạnh bài học"
+                  class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-emerald-500/10 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M16 18l6-6-6-6M8 6l-6 6 6 6" />
+            </svg>
+            <span id="quickSplitLabel">Mở Code song song</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- Vùng cuộn tài liệu học thuật -->
+      <div id="leftContentScroll" class="flex-1 overflow-y-auto px-5 sm:px-10 py-7 sm:py-9">
+        <div id="readingMaxWrapper" class="max-w-4xl mx-auto">
+          <div id="moduleHeroCard" class="pb-6 mb-6 border-b border-slate-200 dark:border-slate-800/90"></div>
+          <div id="leftDynamicBody" class="theory-prose text-[15px] text-slate-700 dark:text-slate-300 pb-6"></div>
+
+          <div class="mt-8 pt-6 border-t border-slate-200 dark:border-slate-800 flex items-center justify-between gap-3 pb-6">
+            <button id="prevModuleBtn" type="button"
+                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-surface-900 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-emerald-500/50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition">
+              ← Chương trước
+            </button>
+            <button id="nextModuleBtn" type="button"
+                    class="inline-flex items-center gap-2 px-3.5 py-2 rounded-lg border border-slate-200 dark:border-slate-800 bg-white dark:bg-surface-900 text-xs font-semibold text-slate-700 dark:text-slate-300 hover:border-emerald-500/50 disabled:opacity-40 disabled:cursor-not-allowed cursor-pointer transition">
+              Chương tiếp theo →
+            </button>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Thanh kéo chia cột (Split Mode Desktop) -->
+    <div id="paneResizer" role="separator" aria-orientation="vertical" tabindex="0"
+         aria-label="Kéo hoặc nhấn phím mũi tên Trái Phải để chỉnh độ rộng hai cột"
+         title="Kéo để thay đổi kích thước (Nhấp đúp đặt lại 50/50)"
+         class="hidden w-1.5 shrink-0 bg-slate-200 dark:bg-slate-800 hover:bg-emerald-500 dark:hover:bg-emerald-500 cursor-col-resize items-center justify-center transition-colors focus:outline-none focus:bg-emerald-500">
+    </div>
+
+    <!-- PANE PHẢI: TRÌNH BIÊN TẬP CODE C & KẾT QUẢ CHẤM (PLAYGROUND / SPLIT) -->
+    <section id="playgroundPane" aria-label="Môi trường Thực hành Code C"
+             class="hidden flex-1 h-full flex-col min-w-0 min-h-0 bg-[#0b1016] text-slate-100 border-l border-slate-200 dark:border-slate-800/80">
+
+      <!-- Toolbar Editor -->
+      <div class="shrink-0 px-3.5 py-2.5 bg-surface-900 border-b border-slate-800/90 flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0 flex-1">
+          <span class="inline-flex items-center justify-center w-6 h-6 rounded-md bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shrink-0" aria-hidden="true">
+            <svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M8 9l3 3-3 3m5 0h3" />
+            </svg>
+          </span>
+          <label for="exerciseSelect" class="sr-only">Chọn bài tập C nhúng</label>
+          <select id="exerciseSelect"
+                  class="min-w-0 flex-1 max-w-md rounded-lg bg-surface-850 border border-slate-700/80 px-2.5 py-1.5 text-xs font-medium text-slate-100 focus:border-emerald-500 focus:outline-none focus:ring-1 focus:ring-emerald-500 cursor-pointer truncate">
+          </select>
+        </div>
+
+        <div class="flex items-center gap-2 shrink-0">
+          <button id="toggleTaskBtn" type="button" title="Thu gọn / mở rộng đề bài"
+                  class="inline-flex items-center gap-1 px-2.5 py-1.5 rounded-lg text-xs font-medium bg-surface-850 hover:bg-surface-800 text-slate-300 border border-slate-700/80 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            Đề bài
+          </button>
+
+          <button id="resetBtn" type="button" title="Đặt lại code mẫu ban đầu"
+                  class="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-surface-850 hover:bg-surface-800 text-slate-200 border border-slate-700/80 transition cursor-pointer focus:outline-none focus:ring-2 focus:ring-emerald-500">
+            <svg class="w-3.5 h-3.5 text-emerald-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h5M20 20v-5h-5M5.6 15A8 8 0 0019 12M18.4 9A8 8 0 005 12" />
+            </svg>
+            <span class="hidden sm:inline">Đặt lại</span>
+          </button>
+
+          <button id="runBtn" type="button" title="Biên dịch & chấm (Phím tắt: Ctrl + Enter)"
+                  class="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-lg text-xs font-bold bg-emerald-500 hover:bg-emerald-400 active:bg-emerald-600 text-slate-950 shadow-sm transition cursor-pointer disabled:opacity-60 disabled:cursor-wait focus:outline-none focus:ring-2 focus:ring-emerald-400">
+            <svg id="runIconPlay" class="w-3.5 h-3.5 fill-current" viewBox="0 0 20 20" aria-hidden="true">
+              <path d="M6.3 2.84A1.5 1.5 0 004 4.11v11.78a1.5 1.5 0 002.3 1.27l9.34-5.89a1.5 1.5 0 000-2.54L6.3 2.84z" />
+            </svg>
+            <svg id="runIconSpinner" class="hidden w-3.5 h-3.5 animate-spin" fill="none" viewBox="0 0 24 24" aria-hidden="true">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-90" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path>
+            </svg>
+            <span id="runBtnLabel">Biên dịch &amp; chấm</span>
+            <kbd class="hidden sm:inline-block ml-1 px-1.5 py-0.2 text-[10px] font-mono bg-emerald-700/35 text-slate-950 rounded">Ctrl+↵</kbd>
+          </button>
+        </div>
+      </div>
+
+      <!-- Khung Đề bài + Gợi ý + Đáp án -->
+      <div id="taskCard" class="shrink-0 px-4 py-3 bg-surface-900/75 border-b border-slate-800/90 max-h-[38%] overflow-y-auto space-y-2.5">
+        <div class="flex flex-wrap items-center justify-between gap-2">
+          <div class="flex items-center gap-2 flex-wrap">
+            <span id="exGroup" class="font-mono text-[11px] font-semibold uppercase tracking-wider text-emerald-400"></span>
+            <span id="exLevel" class="px-2 py-0.5 rounded-full font-mono text-[11px] bg-surface-850 text-slate-300 border border-slate-700 empty:hidden"></span>
+          </div>
+          <span class="font-mono text-[11px] text-slate-400">main.c • GCC 15.3 (-std=c11 -fsanitize=undefined)</span>
+        </div>
+        <h2 id="exTitle" class="text-base sm:text-lg font-bold text-white tracking-tight"></h2>
+        <p id="exDesc" class="task-desc text-xs sm:text-[13px] text-slate-300 leading-relaxed"></p>
+
+        <div class="flex flex-wrap gap-2 pt-0.5">
+          <details id="exHint" class="disclosure flex-1 min-w-[200px] rounded-lg border border-slate-800 bg-surface-850/90 text-xs">
+            <summary class="flex items-center justify-between px-3 py-2 cursor-pointer font-medium text-amber-300 select-none">
+              <span>Gợi ý thuật toán</span>
+              <svg class="chev w-3.5 h-3.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <p class="px-3 pb-2.5 text-slate-300 leading-relaxed"></p>
+          </details>
+
+          <details id="exSolution" class="disclosure flex-1 min-w-[200px] rounded-lg border border-slate-800 bg-surface-850/90 text-xs">
+            <summary class="flex items-center justify-between px-3 py-2 cursor-pointer font-medium text-emerald-300 select-none">
+              <span>Đáp án mẫu</span>
+              <svg class="chev w-3.5 h-3.5 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+              </svg>
+            </summary>
+            <div class="px-3 pb-2.5">
+              <pre class="code rounded-lg border border-slate-800 bg-[#080c11] p-2.5 overflow-x-auto text-xs"><code></code></pre>
             </div>
-          </div>
-          <textarea id="editor" aria-label="Trình soạn thảo mã C"></textarea>
-          <p id="editorNote" class="editor-note" aria-live="polite"></p>
+          </details>
         </div>
-
-        <section class="result" aria-labelledby="result-h">
-          <div class="result-head">
-            <h3 id="result-h">Kết quả</h3>
-            <span id="resultStatus" class="status status-idle">Chưa chạy</span>
-          </div>
-          <div id="resultBody" class="result-body" aria-live="polite">
-            <p class="muted">Nhấn <strong>Biên dịch &amp; chấm</strong> (hoặc <kbd>Ctrl</kbd>+<kbd>Enter</kbd>). Mã được biên dịch bằng GCC 15 thật trên godbolt.org cùng header <code>stm32f4xx.h</code> giả lập (thanh ghi là biến trong RAM), sau đó chạy bộ test kiểm tra giá trị thanh ghi và kết quả hàm.</p>
-          </div>
-        </section>
       </div>
-    </div>
-  </section>
 
-  <!-- ============ Công cụ ============ -->
-  <section id="view-tools" class="view" aria-labelledby="tools-h">
-    <div class="page-head">
-      <h1 id="tools-h">Công cụ tính toán</h1>
-      <p class="muted">Kết quả cập nhật ngay khi nhập. Dùng để kiểm tra đáp án bài tập và cấu hình thanh ghi.</p>
-    </div>
-    <div class="tools">
-      <form class="tool" id="toolBitband" novalidate>
-        <header><span class="tool-icon"><i data-lucide="binary"></i></span><div><h2>Bit-band alias</h2><p class="formula">alias = alias_base + (addr − base) × 32 + bit × 4</p></div></header>
-        <div class="fields">
-          <label><span>Địa chỉ (hex)</span><input name="addr" value="0x40020C14" inputmode="text" spellcheck="false" aria-describedby="bbErr"></label>
-          <label><span>Bit (0–31)</span><input name="bit" type="number" value="12" min="0" max="31"></label>
+      <!-- Khu vực chia dọc Editor / Output -->
+      <div id="ideSplitArea" class="flex-1 min-h-0 flex flex-col">
+        <div id="editorContainer" style="height: var(--editor-height);" class="relative min-h-[150px] border-b border-slate-800/90 flex flex-col overflow-hidden">
+          <div class="flex-1 min-h-0 overflow-hidden">
+            <label for="editor" class="sr-only">Trình biên tập mã nguồn C</label>
+            <textarea id="editor" spellcheck="false"
+                      class="w-full h-full bg-[#0b1016] text-slate-100 font-mono text-sm p-4 focus:outline-none resize-none"></textarea>
+          </div>
+          <p id="editorNote" aria-live="polite" class="empty:hidden shrink-0 px-3.5 py-1.5 text-[11px] font-mono text-emerald-300 bg-surface-900 border-t border-slate-800/80"></p>
         </div>
-        <p id="bbErr" class="field-error" role="alert"></p>
-        <dl class="out"></dl>
-      </form>
 
-      <form class="tool" id="toolBrr" novalidate>
-        <header><span class="tool-icon"><i data-lucide="radio-tower"></i></span><div><h2>USART_BRR</h2><p class="formula">USARTDIV = f<sub>PCLK</sub> / (16 × baud), OVER8 = 0</p></div></header>
-        <div class="fields">
-          <label><span>f<sub>PCLK</sub> (Hz)</span><input name="clk" type="number" value="16000000" min="1"></label>
-          <label><span>Baud rate</span><input name="baud" type="number" value="115200" min="1" list="bauds">
-            <datalist id="bauds"><option value="9600"><option value="19200"><option value="38400"><option value="57600"><option value="115200"><option value="230400"><option value="921600"></datalist>
-          </label>
+        <div id="verticalResizer" role="separator" aria-orientation="horizontal" tabindex="0"
+             aria-label="Kéo để chỉnh chiều cao khung Code và khung Kết quả"
+             class="h-1.5 shrink-0 bg-surface-900 hover:bg-emerald-500 cursor-row-resize transition-colors flex items-center justify-center border-b border-slate-800/80">
+          <div class="w-8 h-0.5 bg-slate-700 rounded-full"></div>
         </div>
-        <p class="field-error" role="alert"></p>
-        <dl class="out"></dl>
-      </form>
 
-      <form class="tool" id="toolSystick" novalidate>
-        <header><span class="tool-icon"><i data-lucide="timer"></i></span><div><h2>SysTick SYST_RVR</h2><p class="formula">RVR = T × f<sub>AHB</sub> − 1 (≤ 0xFFFFFF)</p></div></header>
-        <div class="fields">
-          <label><span>f<sub>AHB</sub> (Hz)</span><input name="clk" type="number" value="168000000" min="1"></label>
-          <label><span>Chu kỳ T (ms)</span><input name="ms" type="number" value="1" step="any" min="0"></label>
-        </div>
-        <p class="field-error" role="alert"></p>
-        <dl class="out"></dl>
-      </form>
+        <div id="outputContainer" class="flex-1 min-h-[140px] flex flex-col bg-[#080c11] overflow-hidden select-text">
+          <div class="shrink-0 px-3.5 py-2 bg-surface-900/90 border-b border-slate-800/90 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2 min-w-0">
+              <span class="text-[11px] font-mono font-semibold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 shrink-0"></span>
+                <span class="truncate">Kết quả &amp; Output (GCC 15)</span>
+              </span>
+              <span id="resultStatus" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-mono bg-surface-850 text-slate-400 border border-slate-700/80">Chưa chạy</span>
+            </div>
 
-      <div class="tool" id="toolRing">
-        <header><span class="tool-icon"><i data-lucide="refresh-ccw-dot"></i></span><div><h2>Ring buffer (N = 8)</h2><p class="formula">rỗng: head == tail · đầy: (head + 1) % N == tail</p></div></header>
-        <div class="ring-controls">
-          <label class="inline">Byte<input id="rbVal" value="A" maxlength="1" size="2" spellcheck="false"></label>
-          <button id="rbPut" class="btn btn-secondary btn-sm" type="button"><i data-lucide="arrow-down-to-line"></i>Put</button>
-          <button id="rbGet" class="btn btn-secondary btn-sm" type="button"><i data-lucide="arrow-up-from-line"></i>Get</button>
-          <button id="rbReset" class="btn btn-ghost btn-sm" type="button"><i data-lucide="rotate-ccw"></i>Reset</button>
+            <button id="toggleOutputExpandBtn" type="button"
+                    class="px-2 py-1 rounded text-[11px] font-medium text-slate-400 hover:text-white hover:bg-surface-850 transition cursor-pointer shrink-0">
+              Phóng to Output
+            </button>
+          </div>
+
+          <div id="resultBody" aria-live="polite" class="flex-1 overflow-y-auto p-3.5 space-y-3 text-xs sm:text-[13px]">
+            <p class="text-slate-400 leading-relaxed">Nhấn <strong class="text-emerald-400">Biên dịch &amp; chấm</strong> (hoặc <code class="px-1.5 py-0.5 rounded bg-surface-850 text-slate-200 font-mono">Ctrl + Enter</code>). Mã được biên dịch bằng GCC 15 trên godbolt.org với header <code class="px-1.5 py-0.5 rounded bg-surface-850 text-slate-200 font-mono">stm32f4xx.h</code> giả lập.</p>
+          </div>
         </div>
-        <div id="rbView" class="ring" role="img" aria-label="Trạng thái ring buffer"></div>
-        <p id="rbOut" class="ring-log" aria-live="polite"></p>
       </div>
-    </div>
-  </section>
-</main>
+    </section>
 
-<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/runmode/runmode.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
-<script src="js/calculators.js"></script>
-<script src="js/evaluator.js"></script>
-<script src="js/app.js"></script>
+    <!-- PANE CÔNG CỤ TÍNH TOÁN PHẦN CỨNG -->
+    <section id="toolsPane" aria-label="Công cụ tính toán phần cứng STM32"
+             class="hidden flex-1 h-full overflow-y-auto bg-white dark:bg-surface-950 px-5 sm:px-10 py-7 sm:py-9">
+      <div class="max-w-5xl mx-auto space-y-6">
+        <div class="pb-5 border-b border-slate-200 dark:border-slate-800/90">
+          <span class="font-mono text-[11px] font-semibold uppercase tracking-widest text-emerald-600 dark:text-emerald-400">
+            STM32 • HARDWARE CALCULATORS
+          </span>
+          <h2 class="mt-1.5 text-2xl sm:text-[28px] font-bold text-slate-900 dark:text-white tracking-tight">Công cụ tính toán</h2>
+          <p class="mt-1.5 text-sm text-slate-600 dark:text-slate-400">Kết quả cập nhật ngay khi nhập. Dùng để kiểm tra đáp án bài tập và cấu hình thanh ghi STM32.</p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <!-- Tool 1: Bit-band -->
+          <form class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-surface-900 p-5 flex flex-col gap-4" id="toolBitband" novalidate>
+            <header class="flex items-start gap-3">
+              <span class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 font-mono text-xs font-bold">01</span>
+              <div class="min-w-0">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Bit-band alias</h3>
+                <p class="font-mono text-[11px] text-slate-500 dark:text-slate-400 mt-0.5 break-all">alias = alias_base + (addr − base) × 32 + bit × 4</p>
+              </div>
+            </header>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex flex-col gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <span>Địa chỉ (hex)</span>
+                <input name="addr" value="0x40020C14" inputmode="text" spellcheck="false" aria-describedby="bbErr"
+                       class="h-10 px-3 rounded-lg font-mono text-sm bg-white dark:bg-surface-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <span>Bit (0–31)</span>
+                <input name="bit" type="number" value="12" min="0" max="31"
+                       class="h-10 px-3 rounded-lg font-mono text-sm bg-white dark:bg-surface-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+              </label>
+            </div>
+            <p id="bbErr" class="field-error text-xs text-rose-600 dark:text-rose-400 empty:hidden" role="alert"></p>
+            <dl class="out grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 p-3.5 rounded-xl bg-white dark:bg-surface-950 border border-slate-200 dark:border-slate-800 text-xs"></dl>
+          </form>
+
+          <!-- Tool 2: USART_BRR -->
+          <form class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-surface-900 p-5 flex flex-col gap-4" id="toolBrr" novalidate>
+            <header class="flex items-start gap-3">
+              <span class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 font-mono text-xs font-bold">02</span>
+              <div class="min-w-0">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">USART_BRR</h3>
+                <p class="font-mono text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">USARTDIV = f<sub>PCLK</sub> / (16 × baud), OVER8 = 0</p>
+              </div>
+            </header>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex flex-col gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <span>f<sub>PCLK</sub> (Hz)</span>
+                <input name="clk" type="number" value="16000000" min="1"
+                       class="h-10 px-3 rounded-lg font-mono text-sm bg-white dark:bg-surface-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <span>Baud rate</span>
+                <input name="baud" type="number" value="115200" min="1" list="bauds"
+                       class="h-10 px-3 rounded-lg font-mono text-sm bg-white dark:bg-surface-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+                <datalist id="bauds">
+                  <option value="9600"></option><option value="19200"></option><option value="38400"></option>
+                  <option value="57600"></option><option value="115200"></option><option value="230400"></option><option value="921600"></option>
+                </datalist>
+              </label>
+            </div>
+            <p class="field-error text-xs text-rose-600 dark:text-rose-400 empty:hidden" role="alert"></p>
+            <dl class="out grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 p-3.5 rounded-xl bg-white dark:bg-surface-950 border border-slate-200 dark:border-slate-800 text-xs"></dl>
+          </form>
+
+          <!-- Tool 3: SysTick -->
+          <form class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-surface-900 p-5 flex flex-col gap-4" id="toolSystick" novalidate>
+            <header class="flex items-start gap-3">
+              <span class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 font-mono text-xs font-bold">03</span>
+              <div class="min-w-0">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">SysTick SYST_RVR</h3>
+                <p class="font-mono text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">RVR = T × f<sub>AHB</sub> − 1 (≤ 0xFFFFFF)</p>
+              </div>
+            </header>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+              <label class="flex flex-col gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <span>f<sub>AHB</sub> (Hz)</span>
+                <input name="clk" type="number" value="168000000" min="1"
+                       class="h-10 px-3 rounded-lg font-mono text-sm bg-white dark:bg-surface-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+              </label>
+              <label class="flex flex-col gap-1.5 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <span>Chu kỳ T (ms)</span>
+                <input name="ms" type="number" value="1" step="any" min="0"
+                       class="h-10 px-3 rounded-lg font-mono text-sm bg-white dark:bg-surface-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+              </label>
+            </div>
+            <p class="field-error text-xs text-rose-600 dark:text-rose-400 empty:hidden" role="alert"></p>
+            <dl class="out grid grid-cols-[auto_1fr] gap-x-4 gap-y-2 p-3.5 rounded-xl bg-white dark:bg-surface-950 border border-slate-200 dark:border-slate-800 text-xs"></dl>
+          </form>
+
+          <!-- Tool 4: Ring Buffer -->
+          <div class="rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50/70 dark:bg-surface-900 p-5 flex flex-col gap-4" id="toolRing">
+            <header class="flex items-start gap-3">
+              <span class="w-9 h-9 rounded-lg bg-emerald-500/15 border border-emerald-500/30 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 font-mono text-xs font-bold">04</span>
+              <div class="min-w-0">
+                <h3 class="text-base font-bold text-slate-900 dark:text-white">Ring buffer (N = 8)</h3>
+                <p class="font-mono text-[11px] text-slate-500 dark:text-slate-400 mt-0.5">rỗng: head == tail · đầy: (head + 1) % N == tail</p>
+              </div>
+            </header>
+            <div class="flex flex-wrap items-center gap-2">
+              <label class="flex items-center gap-2 text-xs font-medium text-slate-700 dark:text-slate-300">
+                <span>Byte</span>
+                <input id="rbVal" value="A" maxlength="1" size="2" spellcheck="false"
+                       class="w-12 h-9 text-center rounded-lg font-mono text-sm bg-white dark:bg-surface-950 border border-slate-300 dark:border-slate-700 text-slate-900 dark:text-slate-100 focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500" />
+              </label>
+              <button id="rbPut" type="button"
+                      class="px-3 py-2 rounded-lg text-xs font-semibold bg-emerald-500/15 hover:bg-emerald-500/25 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 cursor-pointer transition">Put</button>
+              <button id="rbGet" type="button"
+                      class="px-3 py-2 rounded-lg text-xs font-semibold bg-white dark:bg-surface-850 hover:bg-slate-100 dark:hover:bg-surface-800 text-slate-700 dark:text-slate-200 border border-slate-300 dark:border-slate-700 cursor-pointer transition">Get</button>
+              <button id="rbReset" type="button"
+                      class="px-3 py-2 rounded-lg text-xs font-medium text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white hover:bg-slate-200/60 dark:hover:bg-surface-850 cursor-pointer transition">Reset</button>
+            </div>
+            <div id="rbView" class="grid grid-cols-8 gap-1.5" role="img" aria-label="Trạng thái ring buffer"></div>
+            <p id="rbOut" class="font-mono text-xs text-slate-700 dark:text-slate-300 p-3 rounded-xl bg-white dark:bg-surface-950 border border-slate-200 dark:border-slate-800" aria-live="polite"></p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Toast thông báo -->
+  <div id="toastNotification" aria-live="polite"
+       class="fixed bottom-4 right-4 z-50 pointer-events-none opacity-0 translate-y-2 transition-all duration-200 px-3.5 py-2 rounded-xl bg-slate-900 dark:bg-emerald-600 text-white text-xs font-medium shadow-lg border border-slate-700/60 dark:border-emerald-400/40">
+  </div>
+
+  <!-- Scripts -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/runmode/runmode.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/selection/active-line.min.js"></script>
+  <script src="js/calculators.js"></script>
+  <script src="js/evaluator.js"></script>
+  <script src="js/resizer.js"></script>
+  <script src="js/app.js"></script>
 </body>
 </html>
