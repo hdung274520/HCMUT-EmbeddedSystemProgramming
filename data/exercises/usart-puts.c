@@ -1,3 +1,24 @@
+// @title: USART1 gửi chuỗi bằng Polling TXE
+// @level: Trung bình
+// @desc: Viết void usart1_puts(const char *s): với mỗi ký tự, chờ cờ TXE trong USART1->SR rồi ghi vào USART1->DR. Kết thúc chờ TC.
+// @hint: Mỗi byte: chờ TXE, ghi DR. Sau byte cuối: chờ TC.
+//==== starter
+#include "stm32f4xx.h"
+
+void usart1_puts(const char *s) {
+    // TODO
+}
+//==== solution
+#include "stm32f4xx.h"
+
+void usart1_puts(const char *s) {
+    while (*s) {
+        while (!(USART1->SR & USART_SR_TXE));
+        USART1->DR = (uint8_t)*s++;
+    }
+    while (!(USART1->SR & USART_SR_TC));
+}
+//==== test
 static void run(const char *s) {
     char msg[96];
     usart1_reset();

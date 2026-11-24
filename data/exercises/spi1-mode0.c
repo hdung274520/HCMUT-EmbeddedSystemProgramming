@@ -1,3 +1,24 @@
+// @title: SPI1 Master Mode 0
+// @level: Trung bình
+// @desc: Bật clock SPI1 (APB2), cấu hình CR1: Master, CPOL=0, CPHA=0, NSS phần mềm (SSM=1, SSI=1), baud /16, sau đó bật SPE.
+// @hint: Gán CR1 = 0 trước để xóa cấu hình cũ, rồi OR các bit cần bật; SPE bật sau cùng.
+//==== starter
+#include "stm32f4xx.h"
+
+void spi1_init(void) {
+    // TODO
+}
+//==== solution
+#include "stm32f4xx.h"
+
+void spi1_init(void) {
+    RCC->APB2ENR |= RCC_APB2ENR_SPI1EN;
+    SPI1->CR1 = 0;
+    SPI1->CR1 |= SPI_CR1_MSTR | SPI_CR1_SSM | SPI_CR1_SSI | (3U << 3);
+    SPI1->CR1 &= ~(SPI_CR1_CPOL | SPI_CR1_CPHA);
+    SPI1->CR1 |= SPI_CR1_SPE;
+}
+//==== test
 int main(void) {
     TEST_BEGIN();
     RCC->APB2ENR = 0;

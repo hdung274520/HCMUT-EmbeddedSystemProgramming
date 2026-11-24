@@ -1,3 +1,25 @@
+// @title: PD12 Output Push-pull, No pull
+// @level: Trung bình
+// @desc: Bật clock GPIOD, cấu hình PD12 là Output (MODER = 01), Push-pull (OTYPER = 0), không pull-up/pull-down (PUPDR = 00), sau đó bật LED bằng BSRR.
+// @hint: Nhớ xóa 2 bit MODER bằng &= ~ trước khi |= giá trị mới.
+//==== starter
+#include "stm32f4xx.h"
+
+void led_init(void) {
+    // TODO
+}
+//==== solution
+#include "stm32f4xx.h"
+
+void led_init(void) {
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIODEN;
+    GPIOD->MODER &= ~(3U << (12 * 2));
+    GPIOD->MODER |=  (1U << (12 * 2));
+    GPIOD->OTYPER &= ~(1U << 12);
+    GPIOD->PUPDR &= ~(3U << (12 * 2));
+    GPIOD->BSRR = (1U << 12);
+}
+//==== test
 int main(void) {
     TEST_BEGIN();
     /* reset values made "dirty" so missing clears are caught */

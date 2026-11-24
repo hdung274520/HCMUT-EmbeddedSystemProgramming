@@ -1,3 +1,23 @@
+// @title: EXTI0_IRQHandler & xóa Pending
+// @level: Trung bình
+// @desc: Viết ISR EXTI0_IRQHandler(): kiểm tra cờ PR0, xóa cờ bằng cách ghi 1 vào EXTI->PR (không dùng |=), rồi đảo LED PD12.
+// @hint: PR là thanh ghi rc_w1: ghi 1 để xóa, dùng phép gán = chứ không |=.
+//==== starter
+#include "stm32f4xx.h"
+
+void EXTI0_IRQHandler(void) {
+    // TODO
+}
+//==== solution
+#include "stm32f4xx.h"
+
+void EXTI0_IRQHandler(void) {
+    if (EXTI->PR & EXTI_PR_PR0) {
+        EXTI->PR = EXTI_PR_PR0;
+        GPIOD->ODR ^= (1U << 12);
+    }
+}
+//==== test
 int main(void) {
     TEST_BEGIN();
     /* line 0 and line 1 both pending: only line 0 may be cleared */

@@ -1,98 +1,180 @@
 <!doctype html>
-<html lang="vi">
+<html lang="vi" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Embedded C Lab – STM32</title>
+<title>Embedded C Lab</title>
+<meta name="description" content="Học C nhúng cho STM32 / ARM Cortex-M: lý thuyết, công cụ tính toán và Playground biên dịch C thật.">
+<script>/* apply saved theme (or OS preference) before first paint */
+try { var t = JSON.parse(localStorage.getItem('theme')); } catch (e) {}
+document.documentElement.dataset.theme = t || (matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.css">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/theme/material-darker.min.css">
 <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
-<aside id="sidebar">
-  <h1>⚡ Embedded C Lab</h1>
-  <nav>
-    <button data-view="theory" class="active">🟢 Lý thuyết</button>
-    <button data-view="tools">🔵 Công cụ tính toán</button>
-    <button data-view="playground">🟡 Code Playground</button>
-    <button data-view="quiz">🔴 Trắc nghiệm</button>
-    <button data-view="cards">🃏 Flashcards</button>
-  </nav>
-  <button id="themeBtn">🌓 Đổi giao diện</button>
-</aside>
+<a class="skip-link" href="#main">Bỏ qua tới nội dung</a>
 
-<main>
-  <!-- Module 1 -->
-  <section id="theory" class="view active">
-    <h2>Lý thuyết cốt lõi</h2>
-    <input id="theorySearch" type="search" placeholder="Tìm kiếm: BSRR, NVIC, mutex...">
-    <div id="theoryList"></div>
+<header class="sidebar">
+  <a class="brand" href="#/theory">
+    <span class="brand-mark"><i data-lucide="cpu"></i></span>
+    <span><strong>Embedded C Lab</strong><small>STM32 · Cortex-M</small></span>
+  </a>
+  <nav class="nav" aria-label="Phân hệ">
+    <a href="#/theory" data-view="theory"><i data-lucide="book-open"></i><span>Lý thuyết</span></a>
+    <a href="#/lab" data-view="lab"><i data-lucide="square-terminal"></i><span>Playground</span></a>
+    <a href="#/tools" data-view="tools"><i data-lucide="calculator"></i><span>Công cụ</span></a>
+  </nav>
+  <div class="sidebar-foot">
+    <button id="themeBtn" class="btn btn-ghost" type="button" aria-label="Chuyển giao diện sáng/tối">
+      <i data-lucide="sun-moon"></i><span>Sáng / Tối</span>
+    </button>
+    <a class="btn btn-ghost" href="https://github.com/hdung274520/HCMUT-EmbeddedSystemProgramming" target="_blank" rel="noopener">
+      <i data-lucide="github"></i><span>Mã nguồn</span>
+    </a>
+  </div>
+</header>
+
+<main id="main" tabindex="-1">
+  <!-- ============ Lý thuyết ============ -->
+  <section id="view-theory" class="view" aria-labelledby="theory-h">
+    <h1 id="theory-h" class="sr-only">Lý thuyết</h1>
+    <div class="split">
+      <aside class="pane-list" aria-label="Mục lục">
+        <button class="btn btn-ghost list-toggle" type="button" aria-expanded="false" aria-controls="tocWrap">
+          <i data-lucide="list"></i><span>Mục lục</span>
+        </button>
+        <div id="tocWrap" class="list-wrap">
+          <label class="search">
+            <i data-lucide="search"></i>
+            <span class="sr-only">Tìm trong lý thuyết</span>
+            <input id="theorySearch" type="search" placeholder="Tìm: con trỏ, BSRR, mutex…" autocomplete="off">
+          </label>
+          <p id="searchInfo" class="list-info" aria-live="polite"></p>
+          <nav id="toc"></nav>
+        </div>
+      </aside>
+      <article id="article" class="article">
+        <div class="skeleton"></div>
+      </article>
+    </div>
   </section>
 
-  <!-- Module 2 -->
-  <section id="tools" class="view">
-    <h2>Công cụ tính toán</h2>
-    <div class="grid">
-      <div class="card">
-        <h3>1. Bit-band Alias</h3>
-        <label>Địa chỉ byte (hex) <input id="bbAddr" value="0x40020C14"></label>
-        <label>Bit (0–7, hoặc 0–31 với địa chỉ word) <input id="bbBit" type="number" value="12" min="0" max="31"></label>
-        <button id="bbCalc">Tính</button>
-        <pre id="bbOut"></pre>
-      </div>
-      <div class="card">
-        <h3>2. USART_BRR (OVER8=0)</h3>
-        <label>f<sub>PCLK</sub> (Hz) <input id="brrClk" type="number" value="16000000"></label>
-        <label>Baud rate <input id="brrBaud" type="number" value="115200"></label>
-        <button id="brrCalc">Tính</button>
-        <pre id="brrOut"></pre>
-      </div>
-      <div class="card">
-        <h3>3. SysTick SYST_RVR</h3>
-        <label>f<sub>AHB</sub> (Hz) <input id="stClk" type="number" value="16000000"></label>
-        <label>Thời gian T (ms) <input id="stMs" type="number" value="1" step="any"></label>
-        <button id="stCalc">Tính</button>
-        <pre id="stOut"></pre>
-      </div>
-      <div class="card">
-        <h3>4. Ring Buffer (size 8)</h3>
-        <div class="row"><input id="rbVal" value="A" maxlength="2" size="3"><button id="rbPut">Put</button><button id="rbGet">Get</button><button id="rbReset">Reset</button></div>
-        <div id="rbView" class="ring"></div>
-        <pre id="rbOut"></pre>
+  <!-- ============ Playground ============ -->
+  <section id="view-lab" class="view" aria-labelledby="lab-h">
+    <h1 id="lab-h" class="sr-only">Code Playground</h1>
+    <div class="split">
+      <aside class="pane-list" aria-label="Danh sách bài tập">
+        <button class="btn btn-ghost list-toggle" type="button" aria-expanded="false" aria-controls="exWrap">
+          <i data-lucide="list-checks"></i><span>Danh sách bài</span>
+        </button>
+        <div id="exWrap" class="list-wrap">
+          <div class="progress-card">
+            <div class="progress-head"><span>Tiến độ</span><strong id="progressText">0/0</strong></div>
+            <div class="progress-bar"><span id="progressBar"></span></div>
+          </div>
+          <nav id="exList"></nav>
+        </div>
+      </aside>
+
+      <div class="lab">
+        <header class="task">
+          <div class="task-meta"><span id="exGroup" class="eyebrow"></span><span id="exLevel" class="badge"></span></div>
+          <h2 id="exTitle"></h2>
+          <p id="exDesc" class="task-desc"></p>
+          <details id="exHint" class="disclosure"><summary><i data-lucide="lightbulb"></i>Gợi ý</summary><p></p></details>
+          <details id="exSolution" class="disclosure"><summary><i data-lucide="eye"></i>Đáp án mẫu</summary><pre class="code"><code></code></pre></details>
+        </header>
+
+        <div class="editor-card">
+          <div class="editor-bar">
+            <span class="file"><i data-lucide="file-code-2"></i>main.c</span>
+            <div class="editor-actions">
+              <button id="resetBtn" class="btn btn-ghost btn-sm" type="button"><i data-lucide="rotate-ccw"></i><span>Đặt lại</span></button>
+              <button id="runBtn" class="btn btn-primary" type="button"><i data-lucide="play"></i><span>Biên dịch &amp; chấm</span><kbd>Ctrl ↵</kbd></button>
+            </div>
+          </div>
+          <textarea id="editor" aria-label="Trình soạn thảo mã C"></textarea>
+          <p id="editorNote" class="editor-note" aria-live="polite"></p>
+        </div>
+
+        <section class="result" aria-labelledby="result-h">
+          <div class="result-head">
+            <h3 id="result-h">Kết quả</h3>
+            <span id="resultStatus" class="status status-idle">Chưa chạy</span>
+          </div>
+          <div id="resultBody" class="result-body" aria-live="polite">
+            <p class="muted">Nhấn <strong>Biên dịch &amp; chấm</strong> (hoặc <kbd>Ctrl</kbd>+<kbd>Enter</kbd>). Mã được biên dịch bằng GCC 15 thật trên godbolt.org cùng header <code>stm32f4xx.h</code> giả lập (thanh ghi là biến trong RAM), sau đó chạy bộ test kiểm tra giá trị thanh ghi và kết quả hàm.</p>
+          </div>
+        </section>
       </div>
     </div>
   </section>
 
-  <!-- Module 3 -->
-  <section id="playground" class="view">
-    <h2>Code Playground</h2>
-    <div class="row"><select id="exSelect"></select><button id="exReset">Nạp lại code mẫu</button><button id="exSolution">Xem đáp án</button></div>
-    <p id="exDesc" class="desc"></p>
-    <textarea id="editor"></textarea>
-    <button id="checkBtn" class="primary">▶ Biên dịch &amp; Chấm điểm</button>
-    <small class="desc">Code được biên dịch bằng GCC thật trên godbolt.org cùng header STM32 giả lập (thanh ghi là biến RAM), sau đó chạy bộ test kiểm tra giá trị thanh ghi.</small>
-    <pre id="compileLog"></pre>
-    <ul id="checkOut" class="checks"></ul>
-  </section>
+  <!-- ============ Công cụ ============ -->
+  <section id="view-tools" class="view" aria-labelledby="tools-h">
+    <div class="page-head">
+      <h1 id="tools-h">Công cụ tính toán</h1>
+      <p class="muted">Kết quả cập nhật ngay khi nhập. Dùng để kiểm tra đáp án bài tập và cấu hình thanh ghi.</p>
+    </div>
+    <div class="tools">
+      <form class="tool" id="toolBitband" novalidate>
+        <header><span class="tool-icon"><i data-lucide="binary"></i></span><div><h2>Bit-band alias</h2><p class="formula">alias = alias_base + (addr − base) × 32 + bit × 4</p></div></header>
+        <div class="fields">
+          <label><span>Địa chỉ (hex)</span><input name="addr" value="0x40020C14" inputmode="text" spellcheck="false" aria-describedby="bbErr"></label>
+          <label><span>Bit (0–31)</span><input name="bit" type="number" value="12" min="0" max="31"></label>
+        </div>
+        <p id="bbErr" class="field-error" role="alert"></p>
+        <dl class="out"></dl>
+      </form>
 
-  <!-- Module 4 -->
-  <section id="quiz" class="view">
-    <h2>Trắc nghiệm <span id="score"></span></h2>
-    <button id="quizReset">Làm lại</button>
-    <div id="quizList"></div>
-  </section>
+      <form class="tool" id="toolBrr" novalidate>
+        <header><span class="tool-icon"><i data-lucide="radio-tower"></i></span><div><h2>USART_BRR</h2><p class="formula">USARTDIV = f<sub>PCLK</sub> / (16 × baud), OVER8 = 0</p></div></header>
+        <div class="fields">
+          <label><span>f<sub>PCLK</sub> (Hz)</span><input name="clk" type="number" value="16000000" min="1"></label>
+          <label><span>Baud rate</span><input name="baud" type="number" value="115200" min="1" list="bauds">
+            <datalist id="bauds"><option value="9600"><option value="19200"><option value="38400"><option value="57600"><option value="115200"><option value="230400"><option value="921600"></datalist>
+          </label>
+        </div>
+        <p class="field-error" role="alert"></p>
+        <dl class="out"></dl>
+      </form>
 
-  <section id="cards" class="view">
-    <h2>Flashcards <small>(click để lật)</small></h2>
-    <div id="cardList" class="grid"></div>
+      <form class="tool" id="toolSystick" novalidate>
+        <header><span class="tool-icon"><i data-lucide="timer"></i></span><div><h2>SysTick SYST_RVR</h2><p class="formula">RVR = T × f<sub>AHB</sub> − 1 (≤ 0xFFFFFF)</p></div></header>
+        <div class="fields">
+          <label><span>f<sub>AHB</sub> (Hz)</span><input name="clk" type="number" value="168000000" min="1"></label>
+          <label><span>Chu kỳ T (ms)</span><input name="ms" type="number" value="1" step="any" min="0"></label>
+        </div>
+        <p class="field-error" role="alert"></p>
+        <dl class="out"></dl>
+      </form>
+
+      <div class="tool" id="toolRing">
+        <header><span class="tool-icon"><i data-lucide="refresh-ccw-dot"></i></span><div><h2>Ring buffer (N = 8)</h2><p class="formula">rỗng: head == tail · đầy: (head + 1) % N == tail</p></div></header>
+        <div class="ring-controls">
+          <label class="inline">Byte<input id="rbVal" value="A" maxlength="1" size="2" spellcheck="false"></label>
+          <button id="rbPut" class="btn btn-secondary btn-sm" type="button"><i data-lucide="arrow-down-to-line"></i>Put</button>
+          <button id="rbGet" class="btn btn-secondary btn-sm" type="button"><i data-lucide="arrow-up-from-line"></i>Get</button>
+          <button id="rbReset" class="btn btn-ghost btn-sm" type="button"><i data-lucide="rotate-ccw"></i>Reset</button>
+        </div>
+        <div id="rbView" class="ring" role="img" aria-label="Trạng thái ring buffer"></div>
+        <p id="rbOut" class="ring-log" aria-live="polite"></p>
+      </div>
+    </div>
   </section>
 </main>
 
+<script src="https://unpkg.com/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/marked/12.0.2/marked.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/codemirror.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/mode/clike/clike.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/runmode/runmode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.65.16/addon/edit/matchbrackets.min.js"></script>
 <script src="js/calculators.js"></script>
 <script src="js/evaluator.js"></script>
-<script src="js/quiz.js"></script>
 <script src="js/app.js"></script>
 </body>
 </html>

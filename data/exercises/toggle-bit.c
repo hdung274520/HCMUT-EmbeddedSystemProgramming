@@ -1,3 +1,21 @@
+// @title: Đảo bit thứ n bằng XOR
+// @level: Cơ bản
+// @desc: Viết hàm uint32_t toggle_bit(uint32_t reg, uint8_t n) trả về reg sau khi đảo bit n bằng toán tử ^.
+// @hint: XOR với 1 đảo bit, XOR với 0 giữ nguyên.
+//==== starter
+#include <stdint.h>
+
+uint32_t toggle_bit(uint32_t reg, uint8_t n) {
+    // TODO
+}
+//==== solution
+#include <stdint.h>
+
+uint32_t toggle_bit(uint32_t reg, uint8_t n) {
+    reg ^= (1U << n);
+    return reg;
+}
+//==== test
 int main(void) {
     TEST_BEGIN();
     static const struct { uint32_t in; uint8_t n; uint32_t out; } t[] = {

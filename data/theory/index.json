@@ -1,0 +1,25 @@
+[
+  { "group": "Ngôn ngữ C cho nhúng", "items": [
+    { "id": "c-types", "title": "Kiểu dữ liệu, stdint & chuyển kiểu" },
+    { "id": "c-bitwise", "title": "Toán tử bit, mask & macro" },
+    { "id": "c-pointer-basics", "title": "Con trỏ (1): địa chỉ, & và *" },
+    { "id": "c-pointer-array", "title": "Con trỏ (2): mảng & số học con trỏ" },
+    { "id": "c-pointer-struct", "title": "Con trỏ (3): struct & thanh ghi" },
+    { "id": "c-pointer-function", "title": "Con trỏ (4): con trỏ hàm & void *" },
+    { "id": "c-memory", "title": "Bộ nhớ, volatile, static, const" },
+    { "id": "c-pitfalls", "title": "Lỗi con trỏ thường gặp & debug" },
+    { "id": "c-build-modular", "title": "Build pipeline & Modular C" }
+  ]},
+  { "group": "ARM Cortex-M & STM32", "items": [
+    { "id": "arm-cortex-m", "title": "Cortex-M & Memory map" },
+    { "id": "gpio", "title": "GPIO mức thanh ghi" },
+    { "id": "nvic-systick", "title": "Ngắt NVIC, EXTI & SysTick" },
+    { "id": "usart", "title": "USART & UART console" },
+    { "id": "spi", "title": "SPI driver" }
+  ]},
+  { "group": "Kiến trúc phần mềm", "items": [
+    { "id": "fsm-superloop", "title": "Máy trạng thái & SuperLoop" },
+    { "id": "rtos", "title": "FreeRTOS & CMSIS-RTOS" },
+    { "id": "architecture-adc", "title": "Kiến trúc hệ thống & ADC" }
+  ]}
+]

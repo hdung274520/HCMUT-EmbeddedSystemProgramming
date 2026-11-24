@@ -1,0 +1,6 @@
+[
+  { "group": "Con trỏ & C cơ bản", "items": ["c-swap", "c-sum-array", "c-strlen", "c-reverse", "c-find-max", "c-list-ptr2ptr", "c-callback", "c-dispatch", "c-struct-stats"] },
+  { "group": "Thao tác bit", "items": ["toggle-bit", "c-field-write", "c-bit-tricks", "c-endian", "bitband"] },
+  { "group": "Ngoại vi STM32", "items": ["gpio-pd12", "gpio-button", "exti0", "systick-init", "usart-brr", "usart-puts", "spi1-mode0"] },
+  { "group": "Cấu trúc dữ liệu & kiến trúc", "items": ["ring-buffer", "fsm-traffic"] }
+]
